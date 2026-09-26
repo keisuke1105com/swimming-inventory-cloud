@@ -44,6 +44,7 @@ const SUPABASE_URL='https://amzhcswgydpuiyyhoxiq.supabase.co';
 const SUPABASE_KEY='sb_publishable_bsLTl1RZilhI2ofTDrS5hQ_CctZPLdf';
 const SESSION_KEY='swim_inventory_session_v1';
 let session=null;
+let isAdmin=false;
 let inventory=[], requests=[], histories=[], affiliations=[], cart=[], requestQtyByVariant={};
 const $=id=>document.getElementById(id);
 
@@ -58,7 +59,7 @@ async function api(path,opt={}){
   const t=await r.text();return t?JSON.parse(t):null
 }
 function saveSession(s){session=s;localStorage.setItem(SESSION_KEY,JSON.stringify(s))}
-function clearSession(){session=null;localStorage.removeItem(SESSION_KEY)}
+function clearSession(){session=null;isAdmin=false;localStorage.removeItem(SESSION_KEY)}
 function showLogin(message=''){
   $('appShell').style.display='none';$('loginScreen').style.display='flex';
   $('loginError').style.display=message?'block':'none';$('loginError').textContent=message||'';
@@ -67,6 +68,28 @@ function showApp(){
   $('loginScreen').style.display='none';$('appShell').style.display='block';
   $('loginUser').textContent=session?.user?.email?`ログイン中：${session.user.email}`:'ログイン中';
 }
+async function checkAdmin(){
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/is_admin',{method:'POST',headers:authHeaders(),body:'{}'});
+    if(!r.ok)throw new Error(await r.text());
+    isAdmin=Boolean(await r.json());
+  }catch(e){console.error('管理者判定エラー:',e);isAdmin=false}
+  applyRoleUI();
+}
+function applyRoleUI(){
+  const manageBtn=document.querySelector('.tabs button[data-tab="manage"]');
+  if(manageBtn)manageBtn.style.display=isAdmin?'':'none';
+  const managePanel=$('manage');
+  if(managePanel&&!isAdmin)managePanel.classList.remove('on');
+  const activeManage=manageBtn?.classList.contains('on');
+  if(!isAdmin&&activeManage){
+    manageBtn.classList.remove('on');
+    const invBtn=document.querySelector('.tabs button[data-tab="inventory"]');
+    invBtn?.classList.add('on');
+    $('inventory')?.classList.add('on');
+  }
+}
+
 async function login(){
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
   if(!email||!password)return showLogin('メールアドレスとパスワードを入力してください。');
@@ -79,7 +102,7 @@ async function login(){
     });
     const data=await r.json();
     if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'ログインに失敗しました');
-    saveSession(data);showApp();await loadAll();
+    saveSession(data);showApp();await checkAdmin();await loadAll();
   }catch(e){
     console.error(e);showLogin('ログインできませんでした。メールアドレスとパスワードを確認してください。');
   }finally{
@@ -113,7 +136,7 @@ async function boot(){
   if(session.expires_at && Date.now()/1000 > session.expires_at-60){
     if(!await refreshSession()){clearSession();return showLogin('ログインの有効期限が切れました。もう一度ログインしてください。')}
   }
-  showApp();await loadAll();
+  showApp();await checkAdmin();await loadAll();
 }
 async function loadAll(){try{
  [inventory,affiliations]=await Promise.all([api('inventory_items?select=*&order=sort_order.asc'),api('affiliations?select=*&active=eq.true&order=sort_order.asc')]);
@@ -123,7 +146,7 @@ async function loadAll(){try{
  $('cloudStatus').textContent='☁️ Cloud接続中';
 }catch(e){console.error(e);$('cloudStatus').textContent='⚠️ Cloud接続エラー';alert('Cloudデータの読み込みに失敗しました。通信環境を確認してください。')}}
 function reserved(id){return requests.filter(r=>r.item_id===id&&['希望','確定'].includes(r.status)).reduce((a,r)=>a+r.quantity,0)}
-function render(){let q=($('search')?.value||'').toLowerCase(),f=$('filter')?.value||'all';
+function render(){applyRoleUI();let q=($('search')?.value||'').toLowerCase(),f=$('filter')?.value||'all';
  $('invBody').innerHTML=inventory.map(x=>{let h=reserved(x.id),left=x.stock-h;if(!(x.item+x.variant).toLowerCase().includes(q))return'';if(f==='low'&&left>2)return'';if(f==='zero'&&left!==0)return'';if(f==='requested'&&h===0)return'';let cl=left<=0?'zero':left<=2?'low':'';return `<tr><td>${x.item}</td><td>${x.variant}</td><td class=num>${x.stock}</td><td class=num>${h}</td><td class="num ${cl}">${left}</td></tr>`}).join('');
  $('totalStock').textContent=inventory.reduce((a,x)=>a+x.stock,0);$('hopeCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).reduce((a,r)=>a+r.quantity,0);$('shortCount').textContent=inventory.filter(x=>x.stock-reserved(x.id)<0).length;$('pendingCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).length;
  let low=inventory.map(x=>({...x,left:x.stock-reserved(x.id)})).filter(x=>x.left<=2);$('alerts').innerHTML=low.length?`<b>⚠️ 発注・在庫確認候補 ${low.length}件</b><br><span class=muted>${low.slice(0,8).map(x=>`${x.item} ${x.variant}：残見込み ${x.left}`).join(' ／ ')}${low.length>8?' ほか':''}</span>`:'<b>在庫不足アラートはありません。</b>';
