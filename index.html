@@ -107,7 +107,7 @@ async function addInventoryItem(){
  let sort=inventory.reduce((m,x)=>Math.max(m,Number(x.sort_order)||0),0)+1;
  try{
    for(const variant of variants){
-     await api('inventory_items',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_name:name,variant,stock,sort_order:sort++})});
+     await api('inventory_items',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_name:name,variant,stock,alert_stock:2,sort_order:sort++})});
    }
    $('newItemName').value='';$('newVariant').value='';$('newStock').value=0;newVariantSelections=[];
    await loadAll();setupNewVariantTabs();
