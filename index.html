@@ -7,16 +7,114 @@
 .request-size-card .stepper button{padding:7px;font-size:19px}
 .request-size-card .stepper input{padding:8px}
 @media(max-width:700px){.request-size-grid{grid-template-columns:repeat(2,1fr)}}
-.multi-variant-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.multi-variant-tabs .choice-btn.on{background:#0877bd;color:#fff;border-color:#0877bd}.settings-list{margin-top:12px;display:grid;gap:8px}.settings-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid #dbe8f0;border-radius:10px}.settings-item small{color:#607786}@media(max-width:700px){.settings-row{grid-template-columns:1fr 1fr}.settings-row .wide{grid-column:1/-1}}@media(max-width:700px){.kpis{grid-template-columns:1fr 1fr}.reqgrid{grid-template-columns:1fr}table{font-size:13px}th,td{padding:8px 5px}.hide-sm{display:none}}</style></head><body><header><div class="wrap"><h1>🏊 スイミング用品・在庫管理 Cloud</h1><div>在庫管理 ｜ 各所属 希望数共有</div></div><div class="wrap" style="padding-top:0"><span id="cloudStatus" style="font-size:12px;opacity:.9">☁️ Cloud接続確認中...</span></div></header><main class="wrap"><section class="kpis"><div class="card kpi"><span>総在庫数</span><br><b id="totalStock">0</b></div><div class="card kpi"><span>希望数</span><br><b id="hopeCount">0</b></div><div class="card kpi"><span>在庫不足</span><br><b id="shortCount">0</b></div><div class="card kpi"><span>未処理</span><br><b id="pendingCount">0</b></div></section><div class="tabs"><button class="on" data-tab="inventory">在庫一覧</button><button data-tab="request">希望入力</button><button data-tab="manage">在庫管理</button><button data-tab="history">履歴</button></div><section id="inventory" class="panel on"><div class="toolbar"><input id="search" placeholder="品目・サイズを検索"><select id="filter"><option value="all">すべて</option><option value="low">残り2以下</option><option value="zero">在庫なし</option><option value="requested">希望あり</option></select></div><div style="overflow:auto"><table><thead><tr><th>品目</th><th>サイズ・種類</th><th>現在庫</th><th>希望</th><th>残見込み</th></tr></thead><tbody id="invBody"></tbody></table></div></section><section id="request" class="panel"><div class="card"><h2>各所属 希望入力</h2><p class="muted">複数の商品をカートに追加して、まとめて送信できます。</p><div class="reqgrid"><div><label>所属</label><select id="school"><option>竜王校</option><option>青葉校</option><option>甲府校</option><option>塩山校</option></select></div><div style="grid-column:1/-1"><label>品目</label><div id="requestProductTabs" class="product-tabs"></div><select id="product" style="display:none"></select></div><div style="grid-column:1/-1"><label>サイズ・種類ごとの希望数</label><div id="requestSizeQtyGrid" class="request-size-grid"></div><select id="variant" style="display:none"></select><input id="qty" type="number" value="1" style="display:none"><p class="muted" style="margin:6px 0 0">必要なサイズだけ「＋」で数量を設定してください。0のサイズはカートに追加されません。</p></div></div><label>メモ</label><input id="memo" placeholder="任意"><p class="muted">入力後は「希望」として管理画面に表示されます。</p><button class="btn" onclick="addToCart()">＋ カートに追加</button><h3>希望カート</h3><div id="cartBody" class="muted">まだ商品はありません。</div><div class="right" style="margin-top:10px"><button class="btn primary" onclick="submitCart()">まとめて希望を送信</button></div></div></section><section id="manage" class="panel"><div id="alerts" class="alertbox"></div><div class="card"><h2>📦 入荷・在庫調整</h2><p class="muted">入荷した数を追加したり、棚卸しで在庫数を修正できます。変更内容は履歴に残ります。</p><div><label>品目</label><div id="adjustProductTabs" class="product-tabs"></div><select id="adjustProduct" style="display:none"></select></div><div class="choice-label"><label>サイズ・種類</label><div id="adjustVariantTabs" class="variant-tabs"></div><select id="adjustVariant" style="display:none"></select></div><div class="reqgrid"><div><label>現在庫</label><input id="adjustCurrent" type="number" readonly></div><div><label>変更方法</label><select id="adjustMode"><option value="add">入荷数を追加</option><option value="set">在庫数を直接修正</option></select></div><div><label id="adjustQtyLabel">入荷数</label><div class="stepper"><button type="button" onclick="stepAdjust(-1)">−</button><input id="adjustQty" type="number" min="0" value="1"><button type="button" onclick="stepAdjust(1)">＋</button></div></div><div><label>理由・メモ</label><input id="adjustMemo" placeholder="例：秋物入荷、棚卸し修正"></div></div><p class="muted" id="adjustPreview"></p><button class="btn primary" onclick="adjustStock()">在庫を反映</button></div><div class="card" style="margin-top:12px"><h2>⚙️ 商品設定</h2><p class="muted">新しい品目・サイズを追加できます。通常は「使用終了」を使い、テスト登録や誤登録など履歴のない商品だけ「完全削除」できます。</p><div class="settings-row"><div><label>品目名</label><input id="newItemName" placeholder="例：競泳水着"></div><div><label>サイズ・種類（複数選択可）</label>
+.multi-variant-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.multi-variant-tabs .choice-btn.on{background:#0877bd;color:#fff;border-color:#0877bd}.settings-list{margin-top:12px;display:grid;gap:8px}.settings-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid #dbe8f0;border-radius:10px}.settings-item small{color:#607786}@media(max-width:700px){.settings-row{grid-template-columns:1fr 1fr}.settings-row .wide{grid-column:1/-1}}@media(max-width:700px){.kpis{grid-template-columns:1fr 1fr}.reqgrid{grid-template-columns:1fr}table{font-size:13px}th,td{padding:8px 5px}.hide-sm{display:none}}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#eaf6fd,#f7fbfe)}
+.login-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 35px #0b4d7030}
+.login-card h1{font-size:24px;margin:0 0 8px;color:#075f96}
+.login-card p{margin:0 0 18px}
+.login-card input{margin-bottom:12px}
+.login-error{display:none;margin:10px 0;padding:10px;border-radius:10px;background:#ffe1e1;color:#a40000;font-size:13px}
+.login-note{margin-top:12px;color:#607786;font-size:12px}
+.userbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}
+.userbar button{border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.15);color:#fff;border-radius:9px;padding:7px 10px;font-weight:700;cursor:pointer}
+#appShell{display:none}
+</style></head><body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h1>🏊 スイミング用品・在庫管理 Cloud</h1>
+    <p class="muted">登録されたアカウントでログインしてください。</p>
+    <label>メールアドレス</label>
+    <input id="loginEmail" type="email" autocomplete="username" placeholder="メールアドレス">
+    <label>パスワード</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="パスワード">
+    <div id="loginError" class="login-error"></div>
+    <button id="loginButton" class="btn primary" style="width:100%" type="button" onclick="login()">ログイン</button>
+    <div class="login-note">※ アカウントは管理者が発行します。</div>
+  </div>
+</div>
+<div id="appShell">
+<header><div class="wrap"><h1>🏊 スイミング用品・在庫管理 Cloud</h1><div>在庫管理 ｜ 各所属 希望数共有</div></div><div class="wrap" style="padding-top:0"><span id="cloudStatus" style="font-size:12px;opacity:.9">☁️ Cloud接続確認中...</span>
+<div id="userBar" class="userbar"><span id="loginUser"></span><button type="button" onclick="logout()">ログアウト</button></div>
+</div></header><main class="wrap"><section class="kpis"><div class="card kpi"><span>総在庫数</span><br><b id="totalStock">0</b></div><div class="card kpi"><span>希望数</span><br><b id="hopeCount">0</b></div><div class="card kpi"><span>在庫不足</span><br><b id="shortCount">0</b></div><div class="card kpi"><span>未処理</span><br><b id="pendingCount">0</b></div></section><div class="tabs"><button class="on" data-tab="inventory">在庫一覧</button><button data-tab="request">希望入力</button><button data-tab="manage">在庫管理</button><button data-tab="history">履歴</button></div><section id="inventory" class="panel on"><div class="toolbar"><input id="search" placeholder="品目・サイズを検索"><select id="filter"><option value="all">すべて</option><option value="low">残り2以下</option><option value="zero">在庫なし</option><option value="requested">希望あり</option></select></div><div style="overflow:auto"><table><thead><tr><th>品目</th><th>サイズ・種類</th><th>現在庫</th><th>希望</th><th>残見込み</th></tr></thead><tbody id="invBody"></tbody></table></div></section><section id="request" class="panel"><div class="card"><h2>各所属 希望入力</h2><p class="muted">複数の商品をカートに追加して、まとめて送信できます。</p><div class="reqgrid"><div><label>所属</label><select id="school"><option>竜王校</option><option>青葉校</option><option>甲府校</option><option>塩山校</option></select></div><div style="grid-column:1/-1"><label>品目</label><div id="requestProductTabs" class="product-tabs"></div><select id="product" style="display:none"></select></div><div style="grid-column:1/-1"><label>サイズ・種類ごとの希望数</label><div id="requestSizeQtyGrid" class="request-size-grid"></div><select id="variant" style="display:none"></select><input id="qty" type="number" value="1" style="display:none"><p class="muted" style="margin:6px 0 0">必要なサイズだけ「＋」で数量を設定してください。0のサイズはカートに追加されません。</p></div></div><label>メモ</label><input id="memo" placeholder="任意"><p class="muted">入力後は「希望」として管理画面に表示されます。</p><button class="btn" onclick="addToCart()">＋ カートに追加</button><h3>希望カート</h3><div id="cartBody" class="muted">まだ商品はありません。</div><div class="right" style="margin-top:10px"><button class="btn primary" onclick="submitCart()">まとめて希望を送信</button></div></div></section><section id="manage" class="panel"><div id="alerts" class="alertbox"></div><div class="card"><h2>📦 入荷・在庫調整</h2><p class="muted">入荷した数を追加したり、棚卸しで在庫数を修正できます。変更内容は履歴に残ります。</p><div><label>品目</label><div id="adjustProductTabs" class="product-tabs"></div><select id="adjustProduct" style="display:none"></select></div><div class="choice-label"><label>サイズ・種類</label><div id="adjustVariantTabs" class="variant-tabs"></div><select id="adjustVariant" style="display:none"></select></div><div class="reqgrid"><div><label>現在庫</label><input id="adjustCurrent" type="number" readonly></div><div><label>変更方法</label><select id="adjustMode"><option value="add">入荷数を追加</option><option value="set">在庫数を直接修正</option></select></div><div><label id="adjustQtyLabel">入荷数</label><div class="stepper"><button type="button" onclick="stepAdjust(-1)">−</button><input id="adjustQty" type="number" min="0" value="1"><button type="button" onclick="stepAdjust(1)">＋</button></div></div><div><label>理由・メモ</label><input id="adjustMemo" placeholder="例：秋物入荷、棚卸し修正"></div></div><p class="muted" id="adjustPreview"></p><button class="btn primary" onclick="adjustStock()">在庫を反映</button></div><div class="card" style="margin-top:12px"><h2>⚙️ 商品設定</h2><p class="muted">新しい品目・サイズを追加できます。通常は「使用終了」を使い、テスト登録や誤登録など履歴のない商品だけ「完全削除」できます。</p><div class="settings-row"><div><label>品目名</label><input id="newItemName" placeholder="例：競泳水着"></div><div><label>サイズ・種類（複数選択可）</label>
 <input id="newVariant" placeholder="例：130 / M / 赤" style="margin-bottom:6px">
 <div id="newVariantTabs" class="multi-variant-tabs"></div>
-<p class="muted" style="margin:6px 0 0">既存のサイズをタップして複数選択できます。上の欄に新しいサイズを入力した場合は、そのサイズも追加します。</p></div><div><label>初期在庫</label><input id="newStock" type="number" min="0" value="0"></div><div><button class="btn primary wide" onclick="addInventoryItem()">＋ 商品追加</button></div></div><div id="productSettingsList" class="settings-list"></div></div><div class="card" style="margin-top:12px"><h2>在庫管理・受渡しチェック</h2><p class="muted">希望 → 確定 → 受渡済。受渡済にすると在庫から自動で差し引きます。</p><div style="overflow:auto"><table><thead><tr><th>所属</th><th>品目</th><th>種類</th><th>数</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table></div></div></section><section id="history" class="panel"><div class="card"><h2>所属別 集計</h2><div id="schoolSummary" class="schoolcards"></div></div><div class="card" style="margin-top:12px"><h2>入出庫・受渡履歴</h2><div id="historyBody" class="history"></div></div></section></main><script>
+<p class="muted" style="margin:6px 0 0">既存のサイズをタップして複数選択できます。上の欄に新しいサイズを入力した場合は、そのサイズも追加します。</p></div><div><label>初期在庫</label><input id="newStock" type="number" min="0" value="0"></div><div><button class="btn primary wide" onclick="addInventoryItem()">＋ 商品追加</button></div></div><div id="productSettingsList" class="settings-list"></div></div><div class="card" style="margin-top:12px"><h2>在庫管理・受渡しチェック</h2><p class="muted">希望 → 確定 → 受渡済。受渡済にすると在庫から自動で差し引きます。</p><div style="overflow:auto"><table><thead><tr><th>所属</th><th>品目</th><th>種類</th><th>数</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table></div></div></section><section id="history" class="panel"><div class="card"><h2>所属別 集計</h2><div id="schoolSummary" class="schoolcards"></div></div><div class="card" style="margin-top:12px"><h2>入出庫・受渡履歴</h2><div id="historyBody" class="history"></div></div></section></main>
+</div><script>
 const SUPABASE_URL='https://amzhcswgydpuiyyhoxiq.supabase.co';
 const SUPABASE_KEY='sb_publishable_bsLTl1RZilhI2ofTDrS5hQ_CctZPLdf';
-const H={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
+const SESSION_KEY='swim_inventory_session_v1';
+let session=null;
 let inventory=[], requests=[], histories=[], affiliations=[], cart=[], requestQtyByVariant={};
 const $=id=>document.getElementById(id);
-async function api(path,opt={}){const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{...H,...(opt.headers||{})}});if(!r.ok)throw new Error(await r.text());const t=await r.text();return t?JSON.parse(t):null}
+
+function authHeaders(){
+  if(!session?.access_token) throw new Error('ログインが必要です');
+  return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};
+}
+async function api(path,opt={}){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{...authHeaders(),...(opt.headers||{})}});
+  if(r.status===401){clearSession();showLogin('ログインの有効期限が切れました。もう一度ログインしてください。');throw new Error('認証期限切れ')}
+  if(!r.ok)throw new Error(await r.text());
+  const t=await r.text();return t?JSON.parse(t):null
+}
+function saveSession(s){session=s;localStorage.setItem(SESSION_KEY,JSON.stringify(s))}
+function clearSession(){session=null;localStorage.removeItem(SESSION_KEY)}
+function showLogin(message=''){
+  $('appShell').style.display='none';$('loginScreen').style.display='flex';
+  $('loginError').style.display=message?'block':'none';$('loginError').textContent=message||'';
+}
+function showApp(){
+  $('loginScreen').style.display='none';$('appShell').style.display='block';
+  $('loginUser').textContent=session?.user?.email?`ログイン中：${session.user.email}`:'ログイン中';
+}
+async function login(){
+  const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+  if(!email||!password)return showLogin('メールアドレスとパスワードを入力してください。');
+  $('loginButton').disabled=true;$('loginButton').textContent='ログイン中...';
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    const data=await r.json();
+    if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'ログインに失敗しました');
+    saveSession(data);showApp();await loadAll();
+  }catch(e){
+    console.error(e);showLogin('ログインできませんでした。メールアドレスとパスワードを確認してください。');
+  }finally{
+    $('loginButton').disabled=false;$('loginButton').textContent='ログイン';
+  }
+}
+async function refreshSession(){
+  if(!session?.refresh_token)return false;
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token:session.refresh_token})
+    });
+    if(!r.ok)return false;
+    saveSession(await r.json());return true;
+  }catch{return false}
+}
+async function logout(){
+  try{
+    if(session?.access_token)await fetch(SUPABASE_URL+'/auth/v1/logout',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token}
+    });
+  }catch(e){console.warn(e)}
+  clearSession();showLogin();$('loginPassword').value='';
+}
+async function boot(){
+  try{session=JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{session=null}
+  if(!session?.access_token)return showLogin();
+  if(session.expires_at && Date.now()/1000 > session.expires_at-60){
+    if(!await refreshSession()){clearSession();return showLogin('ログインの有効期限が切れました。もう一度ログインしてください。')}
+  }
+  showApp();await loadAll();
+}
 async function loadAll(){try{
  [inventory,affiliations]=await Promise.all([api('inventory_items?select=*&order=sort_order.asc'),api('affiliations?select=*&active=eq.true&order=sort_order.asc')]);
  requests=await api('requests?select=*,affiliations(name),inventory_items(item_name,variant)&order=created_at.desc');
@@ -162,5 +260,7 @@ function renderCart(){$('cartBody').innerHTML=cart.length?cart.map((c,i)=>`<div 
 async function submitCart(){if(!cart.length)return alert('商品をカートに追加してください');let aid=Number($('school').value);try{for(const c of cart)await api('requests',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({affiliation_id:aid,item_id:c.item_id,quantity:c.qty,status:'希望'})});cart=[];renderCart();await loadAll();alert('希望をまとめて送信しました')}catch(e){console.error(e);alert('送信に失敗しました')}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.tab).classList.add('on');render()});
 $('search').oninput=render;$('filter').onchange=render;if($('newItemName'))$('newItemName').oninput=setupNewVariantTabs;$('adjustProduct').onchange=setupAdjustVariants;$('adjustVariant').onchange=updateAdjustPreview;$('adjustMode').onchange=updateAdjustPreview;$('adjustQty').oninput=updateAdjustPreview;
-setInterval(loadAll,10000);loadAll();
+setInterval(()=>{if(session?.access_token)loadAll()},10000);boot();
+$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+$('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginPassword').focus()});
 </script></body></html>
