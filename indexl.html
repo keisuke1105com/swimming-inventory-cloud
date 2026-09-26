@@ -1,0 +1,289 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>スイミング用品・在庫管理 Cloud</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f7fb;color:#123}header{background:linear-gradient(135deg,#0877bd,#05a5d9);color:#fff;padding:22px 18px}header h1{font-size:22px;margin:0 0 5px}.wrap{max-width:1050px;margin:auto;padding:16px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 3px 12px #0b4d7020}.kpi b{font-size:25px;color:#0877bd}.tabs{display:flex;gap:8px;margin:16px 0;overflow:auto}.tabs button,.btn{border:0;border-radius:10px;padding:10px 14px;background:#dfeef8;color:#075f96;font-weight:700}.tabs button.on,.btn.primary{background:#0877bd;color:#fff}.toolbar{display:flex;gap:8px;margin-bottom:10px}.toolbar input,.toolbar select,input[type=number]{padding:10px;border:1px solid #c9dbe7;border-radius:9px;background:#fff}.toolbar input{flex:1}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}th{background:#e7f4fb;color:#075f96;text-align:left}th,td{padding:10px;border-bottom:1px solid #e8eef2}td.num{text-align:center}.low{background:#fff2cc}.zero{background:#ffdada;color:#a40000;font-weight:700}.badge{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}.hope{background:#fff1bf}.confirmed{background:#d9ecff}.done{background:#d9f5e3}.panel{display:none}.panel.on{display:block}.reqgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:block;font-size:13px;font-weight:700;margin:8px 0 4px}select,input{width:100%}.muted{color:#607786;font-size:13px}.history{margin-top:12px}.alertbox{margin:12px 0;padding:12px;border-radius:12px;background:#fff7d6}.cartrow{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #e8eef2}.schoolcards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.schoolcard{background:#fff;border-radius:12px;padding:12px;border:1px solid #dbe8f0}.danger{background:#ffe1e1!important;color:#a40000!important}.right{text-align:right}.product-tabs,.variant-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.choice-btn{width:auto;border:1px solid #b9d7e8;border-radius:10px;padding:10px 13px;background:#eef7fc;color:#075f96;font-weight:700;cursor:pointer}.choice-btn.on{background:#0877bd;color:#fff;border-color:#0877bd}.choice-label{margin-top:12px}.stepper{display:grid;grid-template-columns:54px 1fr 54px;gap:8px;align-items:center}.stepper button{border:0;border-radius:10px;padding:10px;font-size:22px;font-weight:800;background:#dfeef8;color:#075f96}.stepper input{text-align:center;font-size:18px;font-weight:700}.settings-row{display:grid;grid-template-columns:1.3fr 1fr 100px auto;gap:8px;align-items:end;margin-top:10px}.request-size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.request-size-card{border:1px solid #c9dbe7;border-radius:12px;padding:10px;background:#f8fcff}
+.request-size-card.active{border-color:#0877bd;background:#eef8ff}
+.request-size-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;color:#075f96;font-weight:700}
+.request-size-stock{font-size:12px;font-weight:500;color:#607786}
+.request-size-card .stepper{grid-template-columns:42px 1fr 42px}
+.request-size-card .stepper button{padding:7px;font-size:19px}
+.request-size-card .stepper input{padding:8px}
+@media(max-width:700px){.request-size-grid{grid-template-columns:repeat(2,1fr)}}
+.multi-variant-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.multi-variant-tabs .choice-btn.on{background:#0877bd;color:#fff;border-color:#0877bd}.settings-list{margin-top:12px;display:grid;gap:8px}.settings-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px;border:1px solid #dbe8f0;border-radius:10px}.settings-item small{color:#607786}@media(max-width:700px){.settings-row{grid-template-columns:1fr 1fr}.settings-row .wide{grid-column:1/-1}}@media(max-width:700px){.kpis{grid-template-columns:1fr 1fr}.reqgrid{grid-template-columns:1fr}table{font-size:13px}th,td{padding:8px 5px}.hide-sm{display:none}}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#eaf6fd,#f7fbfe)}
+.login-card{width:min(430px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 35px #0b4d7030}
+.login-card h1{font-size:24px;margin:0 0 8px;color:#075f96}
+.login-card p{margin:0 0 18px}
+.login-card input{margin-bottom:12px}
+.login-error{display:none;margin:10px 0;padding:10px;border-radius:10px;background:#ffe1e1;color:#a40000;font-size:13px}
+.login-note{margin-top:12px;color:#607786;font-size:12px}
+.userbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}
+.userbar button{border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.15);color:#fff;border-radius:9px;padding:7px 10px;font-weight:700;cursor:pointer}
+#appShell{display:none}
+</style></head><body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h1>🏊 スイミング用品・在庫管理 Cloud</h1>
+    <p class="muted">登録されたアカウントでログインしてください。</p>
+    <label>メールアドレス</label>
+    <input id="loginEmail" type="email" autocomplete="username" placeholder="メールアドレス">
+    <label>パスワード</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="パスワード">
+    <div id="loginError" class="login-error"></div>
+    <button id="loginButton" class="btn primary" style="width:100%" type="button" onclick="login()">ログイン</button>
+    <div class="login-note">※ アカウントは管理者が発行します。</div>
+  </div>
+</div>
+<div id="appShell">
+<header><div class="wrap"><h1>🏊 スイミング用品・在庫管理 Cloud</h1><div>在庫管理 ｜ 各所属 希望数共有</div></div><div class="wrap" style="padding-top:0"><span id="cloudStatus" style="font-size:12px;opacity:.9">☁️ Cloud接続確認中...</span>
+<div id="userBar" class="userbar"><span id="loginUser"></span><button type="button" onclick="logout()">ログアウト</button></div>
+</div></header><main class="wrap"><section class="kpis"><div class="card kpi"><span>総在庫数</span><br><b id="totalStock">0</b></div><div class="card kpi"><span>希望数</span><br><b id="hopeCount">0</b></div><div class="card kpi"><span>在庫不足</span><br><b id="shortCount">0</b></div><div class="card kpi"><span>未処理</span><br><b id="pendingCount">0</b></div></section><div class="tabs"><button class="on" data-tab="inventory">在庫一覧</button><button data-tab="request">希望入力</button><button data-tab="manage">在庫管理</button><button data-tab="history">履歴</button></div><section id="inventory" class="panel on"><div class="toolbar"><input id="search" placeholder="品目・サイズを検索"><select id="filter"><option value="all">すべて</option><option value="low">残り2以下</option><option value="zero">在庫なし</option><option value="requested">希望あり</option></select></div><div style="overflow:auto"><table><thead><tr><th>品目</th><th>サイズ・種類</th><th>現在庫</th><th>希望</th><th>残見込み</th></tr></thead><tbody id="invBody"></tbody></table></div></section><section id="request" class="panel"><div class="card"><h2>各所属 希望入力</h2><p class="muted">複数の商品をカートに追加して、まとめて送信できます。</p><div class="reqgrid"><div><label>所属</label><select id="school"><option>竜王校</option><option>青葉校</option><option>甲府校</option><option>塩山校</option></select></div><div style="grid-column:1/-1"><label>品目</label><div id="requestProductTabs" class="product-tabs"></div><select id="product" style="display:none"></select></div><div style="grid-column:1/-1"><label>サイズ・種類ごとの希望数</label><div id="requestSizeQtyGrid" class="request-size-grid"></div><select id="variant" style="display:none"></select><input id="qty" type="number" value="1" style="display:none"><p class="muted" style="margin:6px 0 0">必要なサイズだけ「＋」で数量を設定してください。0のサイズはカートに追加されません。</p></div></div><label>メモ</label><input id="memo" placeholder="任意"><p class="muted">入力後は「希望」として管理画面に表示されます。</p><button class="btn" onclick="addToCart()">＋ カートに追加</button><h3>希望カート</h3><div id="cartBody" class="muted">まだ商品はありません。</div><div class="right" style="margin-top:10px"><button class="btn primary" onclick="submitCart()">まとめて希望を送信</button></div></div></section><section id="manage" class="panel"><div id="alerts" class="alertbox"></div><div class="card"><h2>📦 入荷・在庫調整</h2><p class="muted">入荷した数を追加したり、棚卸しで在庫数を修正できます。変更内容は履歴に残ります。</p><div><label>品目</label><div id="adjustProductTabs" class="product-tabs"></div><select id="adjustProduct" style="display:none"></select></div><div class="choice-label"><label>サイズ・種類</label><div id="adjustVariantTabs" class="variant-tabs"></div><select id="adjustVariant" style="display:none"></select></div><div class="reqgrid"><div><label>現在庫</label><input id="adjustCurrent" type="number" readonly></div><div><label>変更方法</label><select id="adjustMode"><option value="add">入荷数を追加</option><option value="set">在庫数を直接修正</option></select></div><div><label id="adjustQtyLabel">入荷数</label><div class="stepper"><button type="button" onclick="stepAdjust(-1)">−</button><input id="adjustQty" type="number" min="0" value="1"><button type="button" onclick="stepAdjust(1)">＋</button></div></div><div><label>理由・メモ</label><input id="adjustMemo" placeholder="例：秋物入荷、棚卸し修正"></div></div><p class="muted" id="adjustPreview"></p><button class="btn primary" onclick="adjustStock()">在庫を反映</button></div><div class="card" style="margin-top:12px"><h2>⚙️ 商品設定</h2><p class="muted">新しい品目・サイズを追加できます。通常は「使用終了」を使い、テスト登録や誤登録など履歴のない商品だけ「完全削除」できます。</p><div class="settings-row"><div><label>品目名</label><input id="newItemName" placeholder="例：競泳水着"></div><div><label>サイズ・種類（複数選択可）</label>
+<input id="newVariant" placeholder="例：130 / M / 赤" style="margin-bottom:6px">
+<div id="newVariantTabs" class="multi-variant-tabs"></div>
+<p class="muted" style="margin:6px 0 0">既存のサイズをタップして複数選択できます。上の欄に新しいサイズを入力した場合は、そのサイズも追加します。</p></div><div><label>初期在庫</label><input id="newStock" type="number" min="0" value="0"></div><div><button class="btn primary wide" onclick="addInventoryItem()">＋ 商品追加</button></div></div><div id="productSettingsList" class="settings-list"></div></div><div class="card" style="margin-top:12px"><h2>在庫管理・受渡しチェック</h2><p class="muted">希望 → 確定 → 受渡済。受渡済にすると在庫から自動で差し引きます。</p><div style="overflow:auto"><table><thead><tr><th>所属</th><th>品目</th><th>種類</th><th>数</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table></div></div></section><section id="history" class="panel"><div class="card"><h2>所属別 集計</h2><div id="schoolSummary" class="schoolcards"></div></div><div class="card" style="margin-top:12px"><h2>入出庫・受渡履歴</h2><div id="historyBody" class="history"></div></div></section></main>
+</div><script>
+const SUPABASE_URL='https://amzhcswgydpuiyyhoxiq.supabase.co';
+const SUPABASE_KEY='sb_publishable_bsLTl1RZilhI2ofTDrS5hQ_CctZPLdf';
+const SESSION_KEY='swim_inventory_session_v1';
+let session=null;
+let isAdmin=false;
+let inventory=[], requests=[], histories=[], affiliations=[], cart=[], requestQtyByVariant={};
+const $=id=>document.getElementById(id);
+
+function authHeaders(){
+  if(!session?.access_token) throw new Error('ログインが必要です');
+  return {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'};
+}
+async function api(path,opt={}){
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...opt,headers:{...authHeaders(),...(opt.headers||{})}});
+  if(r.status===401){clearSession();showLogin('ログインの有効期限が切れました。もう一度ログインしてください。');throw new Error('認証期限切れ')}
+  if(!r.ok)throw new Error(await r.text());
+  const t=await r.text();return t?JSON.parse(t):null
+}
+function saveSession(s){session=s;localStorage.setItem(SESSION_KEY,JSON.stringify(s))}
+function clearSession(){session=null;isAdmin=false;localStorage.removeItem(SESSION_KEY)}
+function showLogin(message=''){
+  $('appShell').style.display='none';$('loginScreen').style.display='flex';
+  $('loginError').style.display=message?'block':'none';$('loginError').textContent=message||'';
+}
+function showApp(){
+  $('loginScreen').style.display='none';$('appShell').style.display='block';
+  $('loginUser').textContent=session?.user?.email?`ログイン中：${session.user.email}`:'ログイン中';
+}
+async function checkAdmin(){
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/is_admin',{method:'POST',headers:authHeaders(),body:'{}'});
+    if(!r.ok)throw new Error(await r.text());
+    isAdmin=Boolean(await r.json());
+  }catch(e){console.error('管理者判定エラー:',e);isAdmin=false}
+  applyRoleUI();
+}
+function applyRoleUI(){
+  const manageBtn=document.querySelector('.tabs button[data-tab="manage"]');
+  if(manageBtn)manageBtn.style.display=isAdmin?'':'none';
+  const managePanel=$('manage');
+  if(managePanel&&!isAdmin)managePanel.classList.remove('on');
+  const activeManage=manageBtn?.classList.contains('on');
+  if(!isAdmin&&activeManage){
+    manageBtn.classList.remove('on');
+    const invBtn=document.querySelector('.tabs button[data-tab="inventory"]');
+    invBtn?.classList.add('on');
+    $('inventory')?.classList.add('on');
+  }
+}
+
+async function login(){
+  const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+  if(!email||!password)return showLogin('メールアドレスとパスワードを入力してください。');
+  $('loginButton').disabled=true;$('loginButton').textContent='ログイン中...';
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    const data=await r.json();
+    if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.message||'ログインに失敗しました');
+    saveSession(data);showApp();await checkAdmin();await loadAll();
+  }catch(e){
+    console.error(e);showLogin('ログインできませんでした。メールアドレスとパスワードを確認してください。');
+  }finally{
+    $('loginButton').disabled=false;$('loginButton').textContent='ログイン';
+  }
+}
+async function refreshSession(){
+  if(!session?.refresh_token)return false;
+  try{
+    const r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({refresh_token:session.refresh_token})
+    });
+    if(!r.ok)return false;
+    saveSession(await r.json());return true;
+  }catch{return false}
+}
+async function logout(){
+  try{
+    if(session?.access_token)await fetch(SUPABASE_URL+'/auth/v1/logout',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token}
+    });
+  }catch(e){console.warn(e)}
+  clearSession();showLogin();$('loginPassword').value='';
+}
+async function boot(){
+  try{session=JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch{session=null}
+  if(!session?.access_token)return showLogin();
+  if(session.expires_at && Date.now()/1000 > session.expires_at-60){
+    if(!await refreshSession()){clearSession();return showLogin('ログインの有効期限が切れました。もう一度ログインしてください。')}
+  }
+  showApp();await checkAdmin();await loadAll();
+}
+async function loadAll(){try{
+ [inventory,affiliations]=await Promise.all([api('inventory_items?select=*&order=sort_order.asc'),api('affiliations?select=*&active=eq.true&order=sort_order.asc')]);
+ requests=await api('requests?select=*,affiliations(name),inventory_items(item_name,variant)&order=created_at.desc');
+ histories=await api('inventory_history?select=*,inventory_items(item_name,variant)&order=created_at.desc');
+ inventory=inventory.map(x=>({...x,item:x.item_name})); setupAffiliations();setupProducts();render();setupNewVariantTabs();
+ $('cloudStatus').textContent='☁️ Cloud接続中';
+}catch(e){console.error(e);$('cloudStatus').textContent='⚠️ Cloud接続エラー';alert('Cloudデータの読み込みに失敗しました。通信環境を確認してください。')}}
+function reserved(id){return requests.filter(r=>r.item_id===id&&['希望','確定'].includes(r.status)).reduce((a,r)=>a+r.quantity,0)}
+function render(){applyRoleUI();let q=($('search')?.value||'').toLowerCase(),f=$('filter')?.value||'all';
+ $('invBody').innerHTML=inventory.map(x=>{let h=reserved(x.id),left=x.stock-h;if(!(x.item+x.variant).toLowerCase().includes(q))return'';if(f==='low'&&left>2)return'';if(f==='zero'&&left!==0)return'';if(f==='requested'&&h===0)return'';let cl=left<=0?'zero':left<=2?'low':'';return `<tr><td>${x.item}</td><td>${x.variant}</td><td class=num>${x.stock}</td><td class=num>${h}</td><td class="num ${cl}">${left}</td></tr>`}).join('');
+ $('totalStock').textContent=inventory.reduce((a,x)=>a+x.stock,0);$('hopeCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).reduce((a,r)=>a+r.quantity,0);$('shortCount').textContent=inventory.filter(x=>x.stock-reserved(x.id)<0).length;$('pendingCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).length;
+ let low=inventory.map(x=>({...x,left:x.stock-reserved(x.id)})).filter(x=>x.left<=2);$('alerts').innerHTML=low.length?`<b>⚠️ 発注・在庫確認候補 ${low.length}件</b><br><span class=muted>${low.slice(0,8).map(x=>`${x.item} ${x.variant}：残見込み ${x.left}`).join(' ／ ')}${low.length>8?' ほか':''}</span>`:'<b>在庫不足アラートはありません。</b>';
+ $('manageBody').innerHTML=requests.filter(r=>r.status!=='取消').map(r=>`<tr><td>${r.affiliations?.name||''}</td><td>${r.inventory_items?.item_name||''}</td><td>${r.inventory_items?.variant||''}</td><td>${r.quantity}</td><td><span class="badge ${r.status==='希望'?'hope':r.status==='確定'?'confirmed':'done'}">${r.status}</span></td><td>${r.status==='希望'?`<button class=btn onclick="setStatus(${r.id},'確定')">確定</button>`:r.status==='確定'?`<button class="btn primary" onclick="deliver(${r.id})">☑ 受渡済</button>`:`<button class="btn danger" onclick="undoDone(${r.id})">取消・在庫復元</button>`}</td></tr>`).join('');
+ $('schoolSummary').innerHTML=affiliations.map(a=>{let rs=requests.filter(r=>r.affiliation_id===a.id&&r.status==='受渡済');return `<div class=schoolcard><b>${a.name}</b><br><span style="font-size:22px;color:#0877bd">${rs.reduce((n,r)=>n+r.quantity,0)}点</span><div class=muted>${rs.length}件の受渡し</div></div>`}).join('');
+ $('historyBody').innerHTML=histories.length?histories.map(h=>`<p><b>${new Date(h.created_at).toLocaleString('ja-JP')}</b>　${h.reason}：${h.inventory_items?.item_name||''} ${h.inventory_items?.variant||''} ${h.change_quantity>0?'+':''}${h.change_quantity}</p>`).join(''):'<p class=muted>まだ履歴はありません。</p>';renderProductSettings()}
+async function setStatus(id,status){try{await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status,confirmed_at:status==='確定'?new Date().toISOString():null})});await loadAll()}catch(e){alert('更新に失敗しました')}}
+async function deliver(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(it.stock<r.quantity&&!confirm('在庫数を超えています。受渡済にしますか？'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:Math.max(0,it.stock-r.quantity),updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'受渡済',delivered_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:-r.quantity,reason:`${r.affiliations?.name||''}へ受渡し`})});await loadAll()}catch(e){console.error(e);alert('受渡し処理に失敗しました')}}
+async function undoDone(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(!confirm('受渡済を取り消して在庫を戻しますか？\nこの希望は管理画面から非表示になります。'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:it.stock+r.quantity,updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'取消',delivered_at:null,cancelled_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:r.quantity,reason:`取消・在庫復元（${r.affiliations?.name||''}）`})});await loadAll();alert('受渡しを取り消し、在庫を復元しました')}catch(e){console.error(e);alert('取消処理に失敗しました')}}
+function setupAffiliations(){let old=$('school').value;$('school').innerHTML=affiliations.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');if(old)$('school').value=old}
+function setupProducts(){
+ let old=$('product').value,items=[...new Set(inventory.map(x=>x.item))];
+ $('product').innerHTML=items.map(x=>`<option>${x}</option>`).join('');
+ if(items.includes(old))$('product').value=old;else if(items.length)$('product').value=items[0];
+ if($('requestProductTabs'))$('requestProductTabs').innerHTML=items.map(x=>`<button type="button" class="choice-btn ${x===$('product').value?'on':''}" onclick="selectRequestProduct('${x.replace(/'/g,"\\'")}')">${x}</button>`).join('');
+ setupVariants();setupAdjustProducts()
+}
+function selectRequestProduct(name){
+ $('product').value=name;
+ requestQtyByVariant={};
+ setupProducts();
+}
+function setupVariants(){
+ let list=inventory.filter(x=>x.item===$('product').value);
+ $('variant').innerHTML=list.map(x=>`<option value="${x.id}">${x.variant}</option>`).join('');
+ let validIds=new Set(list.map(x=>String(x.id)));
+ Object.keys(requestQtyByVariant).forEach(id=>{if(!validIds.has(String(id)))delete requestQtyByVariant[id]});
+ if($('requestSizeQtyGrid'))$('requestSizeQtyGrid').innerHTML=list.map(x=>{
+   let q=Number(requestQtyByVariant[x.id]||0);
+   return `<div class="request-size-card ${q>0?'active':''}">
+     <div class="request-size-head"><span>${x.variant}</span><span class="request-size-stock">在庫 ${x.stock}</span></div>
+     <div class="stepper">
+       <button type="button" onclick="stepRequestVariantQty(${x.id},-1)">−</button>
+       <input type="number" min="0" value="${q}" inputmode="numeric" onchange="setRequestVariantQty(${x.id},this.value)">
+       <button type="button" onclick="stepRequestVariantQty(${x.id},1)">＋</button>
+     </div>
+   </div>`
+ }).join('');
+}
+function setRequestVariantQty(id,value){
+ let q=Math.max(0,Math.floor(Number(value)||0));
+ if(q===0)delete requestQtyByVariant[id];else requestQtyByVariant[id]=q;
+ setupVariants();
+}
+function stepRequestVariantQty(id,delta){
+ let q=Math.max(0,Number(requestQtyByVariant[id]||0)+delta);
+ if(q===0)delete requestQtyByVariant[id];else requestQtyByVariant[id]=q;
+ setupVariants();
+}
+function setupAdjustProducts(){if(!$('adjustProduct'))return;let old=$('adjustProduct').value,items=[...new Set(inventory.map(x=>x.item))];$('adjustProduct').innerHTML=items.map(x=>`<option>${x}</option>`).join('');if(items.includes(old))$('adjustProduct').value=old;else if(items.length)$('adjustProduct').value=items[0];if($('adjustProductTabs'))$('adjustProductTabs').innerHTML=items.map(x=>`<button type="button" class="choice-btn ${x===$('adjustProduct').value?'on':''}" onclick="selectAdjustProduct('${x.replace(/'/g,"\\'")}')">${x}</button>`).join('');setupAdjustVariants()}
+function selectAdjustProduct(name){$('adjustProduct').value=name;setupAdjustProducts()}
+function setupAdjustVariants(){if(!$('adjustVariant'))return;let old=Number($('adjustVariant').value),list=inventory.filter(x=>x.item===$('adjustProduct').value);$('adjustVariant').innerHTML=list.map(x=>`<option value="${x.id}">${x.variant}</option>`).join('');if(list.some(x=>x.id===old))$('adjustVariant').value=old;else if(list.length)$('adjustVariant').value=list[0].id;if($('adjustVariantTabs'))$('adjustVariantTabs').innerHTML=list.map(x=>`<button type="button" class="choice-btn ${x.id===Number($('adjustVariant').value)?'on':''}" onclick="selectAdjustVariant(${x.id})">${x.variant}</button>`).join('');updateAdjustPreview()}
+function selectAdjustVariant(id){$('adjustVariant').value=id;setupAdjustVariants()}
+function updateAdjustPreview(){if(!$('adjustVariant'))return;let it=inventory.find(x=>x.id===Number($('adjustVariant').value));if(!it)return;$('adjustCurrent').value=it.stock;let mode=$('adjustMode').value,q=Number($('adjustQty').value||0);$('adjustQtyLabel').textContent=mode==='add'?'入荷数':'変更後の在庫数';$('adjustQty').min='0';let next=mode==='add'?it.stock+q:q;$('adjustPreview').textContent=`変更前 ${it.stock} → 変更後 ${Math.max(0,next)}`}
+async function adjustStock(){let it=inventory.find(x=>x.id===Number($('adjustVariant').value));if(!it)return alert('商品を選択してください');let mode=$('adjustMode').value,q=Number($('adjustQty').value),memo=$('adjustMemo').value.trim();if(!Number.isInteger(q)||q<0)return alert('数は0以上の整数で入力してください');if(mode==='add'&&q===0)return alert('入荷数を入力してください');let next=mode==='add'?it.stock+q:q,change=next-it.stock;if(change===0)return alert('在庫数が変わっていません');let reason=mode==='add'?'入荷':'在庫調整';if(memo)reason+=`（${memo}）`;if(!confirm(`${it.item} ${it.variant}\n在庫 ${it.stock} → ${next}\n反映しますか？`))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:next,updated_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,change_quantity:change,reason})});$('adjustQty').value=mode==='add'?1:next;$('adjustMemo').value='';await loadAll();alert('在庫を更新しました')}catch(e){console.error(e);alert('在庫の更新に失敗しました')}}
+
+function stepAdjust(delta){let el=$('adjustQty'),v=Number(el.value||0)+delta;el.value=Math.max(0,v);updateAdjustPreview()}
+function renderProductSettings(){if(!$('productSettingsList'))return;let groups=[...new Set(inventory.map(x=>x.item))];$('productSettingsList').innerHTML=groups.map(name=>{let xs=inventory.filter(x=>x.item===name);let safe=name.replace(/'/g,"\\'");return `<div class="settings-item"><div><b>${name}</b><br><small>${xs.map(x=>`${x.variant}（${x.stock}）`).join(' ／ ')}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn danger" onclick="retireProduct('${safe}')">使用終了</button><button class="btn danger" style="background:#b42318;color:#fff" onclick="deleteProductPermanently('${safe}')">完全削除</button></div></div>`}).join('')}
+let newVariantSelections=[];
+function setupNewVariantTabs(){
+ if(!$('newVariantTabs'))return;
+ let name=$('newItemName').value.trim();
+ let base=name?[...new Set(inventory.filter(x=>x.item===name).map(x=>x.variant))]:[...new Set(inventory.map(x=>x.variant))];
+ $('newVariantTabs').innerHTML=base.map(v=>`<button type="button" class="choice-btn ${newVariantSelections.includes(v)?'on':''}" onclick="toggleNewVariant('${v.replace(/'/g,"\\'")}')">${v}</button>`).join('');
+}
+function toggleNewVariant(v){
+ let i=newVariantSelections.indexOf(v);
+ if(i>=0)newVariantSelections.splice(i,1);else newVariantSelections.push(v);
+ setupNewVariantTabs();
+}
+async function addInventoryItem(){
+ let name=$('newItemName').value.trim(),typed=$('newVariant').value.trim(),stock=Number($('newStock').value||0);
+ let variants=[...new Set([...newVariantSelections,...(typed?[typed]:[])])];
+ if(!name)return alert('品目名を入力してください');
+ if(!variants.length)return alert('サイズ・種類を1つ以上選択または入力してください');
+ if(!Number.isInteger(stock)||stock<0)return alert('初期在庫は0以上の整数で入力してください');
+ let dup=variants.filter(v=>inventory.some(x=>x.item===name&&x.variant===v));
+ if(dup.length)return alert(`すでに登録済みです：${dup.join('、')}`);
+ let sort=inventory.reduce((m,x)=>Math.max(m,Number(x.sort_order)||0),0)+1;
+ try{
+   for(const variant of variants){
+     await api('inventory_items',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_name:name,variant,stock,alert_stock:2,sort_order:sort++})});
+   }
+   $('newItemName').value='';$('newVariant').value='';$('newStock').value=0;newVariantSelections=[];
+   await loadAll();setupNewVariantTabs();
+   alert(`${variants.length}種類の商品を追加しました`);
+ }catch(e){
+  console.error('商品追加エラー詳細:', e);
+  const detail = (e && (e.message || e.error || e.details || e.hint))
+    ? (e.message || e.error || e.details || e.hint)
+    : String(e);
+  alert('商品追加に失敗しました。\n\nエラー詳細：\n' + detail);
+}
+}
+async function retireProduct(name){let xs=inventory.filter(x=>x.item===name);let linked=requests.some(r=>xs.some(x=>x.id===r.item_id));if(!confirm(`${name} を使用終了にしますか？\n過去の履歴は残します。`))return;try{for(const x of xs){await api(`inventory_items?id=eq.${x.id}`,{method:'PATCH',body:JSON.stringify({sort_order:999999})})}alert(linked?'過去データがあるため削除せず、一覧の最後へ移動しました。':'使用終了として一覧の最後へ移動しました。');await loadAll()}catch(e){console.error(e);alert('使用終了処理に失敗しました')}}
+async function deleteProductPermanently(name){
+ let xs=inventory.filter(x=>x.item===name);
+ if(!xs.length)return alert('対象の商品が見つかりません');
+ let ids=xs.map(x=>x.id);
+ let linkedReq=requests.some(r=>ids.includes(r.item_id));
+ let linkedHist=histories.some(h=>ids.includes(h.item_id));
+ if(linkedReq||linkedHist){
+   return alert('この商品には希望・受渡し・在庫変更などの履歴があるため、完全削除できません。\n履歴を守るため「使用終了」を使ってください。');
+ }
+ if(!confirm(`${name} を完全に削除しますか？\nこの操作は元に戻せません。`))return;
+ try{
+   for(const x of xs){
+     await api(`inventory_items?id=eq.${x.id}`,{method:'DELETE'});
+   }
+   await loadAll();
+   alert(`${name} を完全に削除しました`);
+ }catch(e){
+   console.error('完全削除エラー:',e);
+   alert('完全削除に失敗しました。\n\nエラー詳細：\n'+(e?.message||String(e))+'\n\nSupabase側のDELETE権限が必要な場合があります。');
+ }
+}
+
+function addToCart(){
+ let entries=Object.entries(requestQtyByVariant).filter(([,q])=>Number(q)>0);
+ if(!entries.length)return alert('希望するサイズの数量を「＋」で設定してください');
+ for(const [idStr,qtyRaw] of entries){
+   let id=Number(idStr),qty=Number(qtyRaw),it=inventory.find(x=>x.id===id);
+   if(!it)continue;
+   let existing=cart.find(c=>c.item_id===id);
+   if(existing)existing.qty+=qty;
+   else cart.push({item_id:id,qty,item:it.item,variant:it.variant});
+ }
+ renderCart();
+ requestQtyByVariant={};
+ setupVariants();
+ $('memo').value='';
+}
+function renderCart(){$('cartBody').innerHTML=cart.length?cart.map((c,i)=>`<div class=cartrow><span>${c.item} ${c.variant}</span><b>×${c.qty}</b><button class=btn onclick="cart.splice(${i},1);renderCart()">削除</button></div>`).join(''):'まだ商品はありません。'}
+async function submitCart(){if(!cart.length)return alert('商品をカートに追加してください');let aid=Number($('school').value);try{for(const c of cart)await api('requests',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({affiliation_id:aid,item_id:c.item_id,quantity:c.qty,status:'希望'})});cart=[];renderCart();await loadAll();alert('希望をまとめて送信しました')}catch(e){console.error(e);alert('送信に失敗しました')}}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.tab).classList.add('on');render()});
+$('search').oninput=render;$('filter').onchange=render;if($('newItemName'))$('newItemName').oninput=setupNewVariantTabs;$('adjustProduct').onchange=setupAdjustVariants;$('adjustVariant').onchange=updateAdjustPreview;$('adjustMode').onchange=updateAdjustPreview;$('adjustQty').oninput=updateAdjustPreview;
+setInterval(()=>{if(session?.access_token)loadAll()},10000);boot();
+$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+$('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginPassword').focus()});
+</script></body></html>
