@@ -112,7 +112,13 @@ async function addInventoryItem(){
    $('newItemName').value='';$('newVariant').value='';$('newStock').value=0;newVariantSelections=[];
    await loadAll();setupNewVariantTabs();
    alert(`${variants.length}種類の商品を追加しました`);
- }catch(e){console.error(e);alert('商品追加に失敗しました。Supabaseの権限設定を確認してください')}
+ }catch(e){
+  console.error('商品追加エラー詳細:', e);
+  const detail = (e && (e.message || e.error || e.details || e.hint))
+    ? (e.message || e.error || e.details || e.hint)
+    : String(e);
+  alert('商品追加に失敗しました。\n\nエラー詳細：\n' + detail);
+}
 }
 async function retireProduct(name){let xs=inventory.filter(x=>x.item===name);let linked=requests.some(r=>xs.some(x=>x.id===r.item_id));if(!confirm(`${name} を使用終了にしますか？\n過去の履歴は残します。`))return;try{for(const x of xs){await api(`inventory_items?id=eq.${x.id}`,{method:'PATCH',body:JSON.stringify({sort_order:999999})})}alert(linked?'過去データがあるため削除せず、一覧の最後へ移動しました。':'使用終了として一覧の最後へ移動しました。');await loadAll()}catch(e){console.error(e);alert('使用終了処理に失敗しました')}}
 
