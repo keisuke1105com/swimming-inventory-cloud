@@ -17,6 +17,22 @@
 .login-note{margin-top:12px;color:#607786;font-size:12px}
 .userbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}
 .userbar button{border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.15);color:#fff;border-radius:9px;padding:7px 10px;font-weight:700;cursor:pointer}
+
+.history-filter{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.history-filter button{width:auto;border:1px solid #b9d7e8;border-radius:10px;padding:8px 12px;background:#eef7fc;color:#075f96;font-weight:700;cursor:pointer}
+.history-filter button.on{background:#0877bd;color:#fff;border-color:#0877bd}
+.history-table-wrap{overflow:auto}
+.history-table td,.history-table th{white-space:nowrap}
+.history-type{font-weight:700}
+.history-type.delivery{color:#075f96}.history-type.in{color:#167447}.history-type.adjust{color:#8a5a00}.history-type.cancel{color:#a40000}
+@media(max-width:700px){
+ .history-table thead{display:none}
+ .history-table,.history-table tbody,.history-table tr,.history-table td{display:block;width:100%}
+ .history-table tr{border:1px solid #dbe8f0;border-radius:12px;margin-bottom:10px;padding:10px;background:#fff}
+ .history-table td{border:0;padding:3px 0;white-space:normal}
+ .history-table td::before{content:attr(data-label);display:inline-block;min-width:72px;color:#607786;font-size:12px;font-weight:700;margin-right:6px}
+}
+
 #appShell{display:none}
 </style></head><body>
 <div id="loginScreen" class="login-screen">
@@ -38,7 +54,14 @@
 </div></header><main class="wrap"><section class="kpis"><div class="card kpi"><span>総在庫数</span><br><b id="totalStock">0</b></div><div class="card kpi"><span>希望数</span><br><b id="hopeCount">0</b></div><div class="card kpi"><span>在庫不足</span><br><b id="shortCount">0</b></div><div class="card kpi"><span>未処理</span><br><b id="pendingCount">0</b></div></section><div class="tabs"><button class="on" data-tab="inventory">在庫一覧</button><button data-tab="request">希望入力</button><button data-tab="manage">在庫管理</button><button data-tab="history">履歴</button></div><section id="inventory" class="panel on"><div class="toolbar"><input id="search" placeholder="品目・サイズを検索"><select id="filter"><option value="all">すべて</option><option value="low">残り2以下</option><option value="zero">在庫なし</option><option value="requested">希望あり</option></select></div><div style="overflow:auto"><table><thead><tr><th>品目</th><th>サイズ・種類</th><th>現在庫</th><th>希望</th><th>残見込み</th></tr></thead><tbody id="invBody"></tbody></table></div></section><section id="request" class="panel"><div class="card"><h2>各所属 希望入力</h2><p class="muted">複数の商品をカートに追加して、まとめて送信できます。</p><div class="reqgrid"><div><label>所属</label><select id="school"><option>竜王校</option><option>青葉校</option><option>甲府校</option><option>塩山校</option></select></div><div style="grid-column:1/-1"><label>品目</label><div id="requestProductTabs" class="product-tabs"></div><select id="product" style="display:none"></select></div><div style="grid-column:1/-1"><label>サイズ・種類ごとの希望数</label><div id="requestSizeQtyGrid" class="request-size-grid"></div><select id="variant" style="display:none"></select><input id="qty" type="number" value="1" style="display:none"><p class="muted" style="margin:6px 0 0">必要なサイズだけ「＋」で数量を設定してください。0のサイズはカートに追加されません。</p></div></div><label>メモ</label><input id="memo" placeholder="任意"><p class="muted">入力後は「希望」として管理画面に表示されます。</p><button class="btn" onclick="addToCart()">＋ カートに追加</button><h3>希望カート</h3><div id="cartBody" class="muted">まだ商品はありません。</div><div class="right" style="margin-top:10px"><button class="btn primary" onclick="submitCart()">まとめて希望を送信</button></div></div></section><section id="manage" class="panel"><div id="alerts" class="alertbox"></div><div class="card"><h2>📦 入荷・在庫調整</h2><p class="muted">入荷した数を追加したり、棚卸しで在庫数を修正できます。変更内容は履歴に残ります。</p><div><label>品目</label><div id="adjustProductTabs" class="product-tabs"></div><select id="adjustProduct" style="display:none"></select></div><div class="choice-label"><label>サイズ・種類</label><div id="adjustVariantTabs" class="variant-tabs"></div><select id="adjustVariant" style="display:none"></select></div><div class="reqgrid"><div><label>現在庫</label><input id="adjustCurrent" type="number" readonly></div><div><label>変更方法</label><select id="adjustMode"><option value="add">入荷数を追加</option><option value="set">在庫数を直接修正</option></select></div><div><label id="adjustQtyLabel">入荷数</label><div class="stepper"><button type="button" onclick="stepAdjust(-1)">−</button><input id="adjustQty" type="number" min="0" value="1"><button type="button" onclick="stepAdjust(1)">＋</button></div></div><div><label>理由・メモ</label><input id="adjustMemo" placeholder="例：秋物入荷、棚卸し修正"></div></div><p class="muted" id="adjustPreview"></p><button class="btn primary" onclick="adjustStock()">在庫を反映</button></div><div class="card" style="margin-top:12px"><h2>⚙️ 商品設定</h2><p class="muted">新しい品目・サイズを追加できます。通常は「使用終了」を使い、テスト登録や誤登録など履歴のない商品だけ「完全削除」できます。</p><div class="settings-row"><div><label>品目名</label><input id="newItemName" placeholder="例：競泳水着"></div><div><label>サイズ・種類（複数選択可）</label>
 <input id="newVariant" placeholder="例：130 / M / 赤" style="margin-bottom:6px">
 <div id="newVariantTabs" class="multi-variant-tabs"></div>
-<p class="muted" style="margin:6px 0 0">既存のサイズをタップして複数選択できます。上の欄に新しいサイズを入力した場合は、そのサイズも追加します。</p></div><div><label>初期在庫</label><input id="newStock" type="number" min="0" value="0"></div><div><button class="btn primary wide" onclick="addInventoryItem()">＋ 商品追加</button></div></div><div id="productSettingsList" class="settings-list"></div></div><div class="card" style="margin-top:12px"><h2>在庫管理・受渡しチェック</h2><p class="muted">希望 → 確定 → 受渡済。受渡済にすると在庫から自動で差し引きます。</p><div style="overflow:auto"><table><thead><tr><th>所属</th><th>品目</th><th>種類</th><th>数</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table></div></div></section><section id="history" class="panel"><div class="card"><h2>所属別 集計</h2><div id="schoolSummary" class="schoolcards"></div></div><div class="card" style="margin-top:12px"><h2>入出庫・受渡履歴</h2><div id="historyBody" class="history"></div></div></section></main>
+<p class="muted" style="margin:6px 0 0">既存のサイズをタップして複数選択できます。上の欄に新しいサイズを入力した場合は、そのサイズも追加します。</p></div><div><label>初期在庫</label><input id="newStock" type="number" min="0" value="0"></div><div><button class="btn primary wide" onclick="addInventoryItem()">＋ 商品追加</button></div></div><div id="productSettingsList" class="settings-list"></div></div><div class="card" style="margin-top:12px"><h2>在庫管理・受渡しチェック</h2><p class="muted">希望 → 確定 → 受渡済。受渡済にすると在庫から自動で差し引きます。</p><div style="overflow:auto"><table><thead><tr><th>所属</th><th>品目</th><th>種類</th><th>数</th><th>状態</th><th>操作</th></tr></thead><tbody id="manageBody"></tbody></table></div></div></section><section id="history" class="panel"><div class="card"><h2>所属別 集計</h2><div id="schoolSummary" class="schoolcards"></div></div><div class="card" style="margin-top:12px"><h2>入出庫・受渡履歴</h2>
+<div id="historyFilter" class="history-filter">
+<button type="button" class="on" data-history-filter="all" onclick="setHistoryFilter('all')">すべて</button>
+<button type="button" data-history-filter="delivery" onclick="setHistoryFilter('delivery')">受渡し</button>
+<button type="button" data-history-filter="in" onclick="setHistoryFilter('in')">入荷</button>
+<button type="button" data-history-filter="adjust" onclick="setHistoryFilter('adjust')">在庫修正</button>
+</div>
+<div id="historyBody" class="history"></div></div></section></main>
 </div><script>
 const SUPABASE_URL='https://amzhcswgydpuiyyhoxiq.supabase.co';
 const SUPABASE_KEY='sb_publishable_bsLTl1RZilhI2ofTDrS5hQ_CctZPLdf';
@@ -46,6 +69,7 @@ const SESSION_KEY='swim_inventory_session_v1';
 let session=null;
 let isAdmin=false;
 let inventory=[], requests=[], histories=[], affiliations=[], cart=[], requestQtyByVariant={};
+let historyFilter='all';
 const $=id=>document.getElementById(id);
 
 function authHeaders(){
@@ -152,7 +176,37 @@ function render(){applyRoleUI();let q=($('search')?.value||'').toLowerCase(),f=$
  let low=inventory.map(x=>({...x,left:x.stock-reserved(x.id)})).filter(x=>x.left<=2);$('alerts').innerHTML=low.length?`<b>⚠️ 発注・在庫確認候補 ${low.length}件</b><br><span class=muted>${low.slice(0,8).map(x=>`${x.item} ${x.variant}：残見込み ${x.left}`).join(' ／ ')}${low.length>8?' ほか':''}</span>`:'<b>在庫不足アラートはありません。</b>';
  $('manageBody').innerHTML=requests.filter(r=>r.status!=='取消').map(r=>`<tr><td>${r.affiliations?.name||''}</td><td>${r.inventory_items?.item_name||''}</td><td>${r.inventory_items?.variant||''}</td><td>${r.quantity}</td><td><span class="badge ${r.status==='希望'?'hope':r.status==='確定'?'confirmed':'done'}">${r.status}</span></td><td>${r.status==='希望'?`<button class=btn onclick="setStatus(${r.id},'確定')">確定</button>`:r.status==='確定'?`<button class="btn primary" onclick="deliver(${r.id})">☑ 受渡済</button>`:`<button class="btn danger" onclick="undoDone(${r.id})">取消・在庫復元</button>`}</td></tr>`).join('');
  $('schoolSummary').innerHTML=affiliations.map(a=>{let rs=requests.filter(r=>r.affiliation_id===a.id&&r.status==='受渡済');return `<div class=schoolcard><b>${a.name}</b><br><span style="font-size:22px;color:#0877bd">${rs.reduce((n,r)=>n+r.quantity,0)}点</span><div class=muted>${rs.length}件の受渡し</div></div>`}).join('');
- $('historyBody').innerHTML=histories.length?histories.map(h=>`<p><b>${new Date(h.created_at).toLocaleString('ja-JP')}</b>　${h.reason}：${h.inventory_items?.item_name||''} ${h.inventory_items?.variant||''} ${h.change_quantity>0?'+':''}${h.change_quantity}</p>`).join(''):'<p class=muted>まだ履歴はありません。</p>';renderProductSettings()}
+ renderHistory();renderProductSettings()}
+
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function historyInfo(h){
+ const reason=String(h.reason||'');
+ let type='adjust',label='在庫修正',school='―';
+ if(reason.includes('取消・在庫復元')){type='cancel';label='取消・復元'}
+ else if(reason.includes('へ受渡し')){type='delivery';label='受渡し';school=reason.split('へ受渡し')[0]||'―'}
+ else if(reason.startsWith('入荷')){type='in';label='入荷'}
+ return {type,label,school};
+}
+function setHistoryFilter(v){
+ historyFilter=v;
+ document.querySelectorAll('[data-history-filter]').forEach(b=>b.classList.toggle('on',b.dataset.historyFilter===v));
+ renderHistory();
+}
+function renderHistory(){
+ const body=$('historyBody');if(!body)return;
+ const list=histories.filter(h=>{
+   const t=historyInfo(h).type;
+   if(historyFilter==='all')return true;
+   if(historyFilter==='adjust')return t==='adjust'||t==='cancel';
+   return t===historyFilter;
+ });
+ if(!list.length){body.innerHTML='<p class="muted">該当する履歴はありません。</p>';return}
+ body.innerHTML=`<div class="history-table-wrap"><table class="history-table"><thead><tr><th>日時</th><th>種別</th><th>所属</th><th>品目</th><th>サイズ・種類</th><th>数量</th><th>内容</th></tr></thead><tbody>${list.map(h=>{
+   const info=historyInfo(h),q=Number(h.change_quantity||0);
+   return `<tr><td data-label="日時">${escapeHtml(new Date(h.created_at).toLocaleString('ja-JP'))}</td><td data-label="種別"><span class="history-type ${info.type}">${escapeHtml(info.label)}</span></td><td data-label="所属">${escapeHtml(info.school)}</td><td data-label="品目">${escapeHtml(h.inventory_items?.item_name||'')}</td><td data-label="サイズ">${escapeHtml(h.inventory_items?.variant||'')}</td><td data-label="数量"><b>${q>0?'+':''}${q}</b></td><td data-label="内容">${escapeHtml(h.reason||'')}</td></tr>`
+ }).join('')}</tbody></table></div>`;
+}
+
 async function setStatus(id,status){try{await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status,confirmed_at:status==='確定'?new Date().toISOString():null})});await loadAll()}catch(e){alert('更新に失敗しました')}}
 async function deliver(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(it.stock<r.quantity&&!confirm('在庫数を超えています。受渡済にしますか？'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:Math.max(0,it.stock-r.quantity),updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'受渡済',delivered_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:-r.quantity,reason:`${r.affiliations?.name||''}へ受渡し`})});await loadAll()}catch(e){console.error(e);alert('受渡し処理に失敗しました')}}
 async function undoDone(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(!confirm('受渡済を取り消して在庫を戻しますか？\nこの希望は管理画面から非表示になります。'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:it.stock+r.quantity,updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'取消',delivered_at:null,cancelled_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:r.quantity,reason:`取消・在庫復元（${r.affiliations?.name||''}）`})});await loadAll();alert('受渡しを取り消し、在庫を復元しました')}catch(e){console.error(e);alert('取消処理に失敗しました')}}
