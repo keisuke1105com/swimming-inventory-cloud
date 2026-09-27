@@ -33,6 +33,17 @@
  .history-table td::before{content:attr(data-label);display:inline-block;min-width:72px;color:#607786;font-size:12px;font-weight:700;margin-right:6px}
 }
 
+
+.stock-alert-panel{margin:14px 0;padding:14px;border:1px solid #f0cf75;border-radius:14px;background:#fff8dc}
+.stock-alert-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.stock-alert-head b{font-size:17px}.stock-alert-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stock-alert-item{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #eadfb9}
+.stock-alert-item.danger{border-color:#efb4b4;background:#fff1f1}.stock-alert-item.zero-stock{border-color:#e59a9a;background:#ffe7e7}
+.stock-alert-name{font-weight:800;min-width:0}.stock-alert-metric{font-size:12px;color:#607786;white-space:nowrap}
+.stock-alert-metric strong{display:block;font-size:17px;color:#102433;text-align:center}
+.stock-alert-item.danger .stock-alert-metric:last-child strong,.stock-alert-item.zero-stock .stock-alert-metric:last-child strong{color:#b00020}
+@media(max-width:700px){.stock-alert-list{grid-template-columns:1fr}.stock-alert-item{grid-template-columns:minmax(0,1fr) repeat(3,auto);gap:7px;padding:9px}.stock-alert-metric{font-size:10px}.stock-alert-metric strong{font-size:15px}}
+
 #appShell{display:none}
 </style></head><body>
 <div id="loginScreen" class="login-screen">
@@ -173,7 +184,8 @@ function reserved(id){return requests.filter(r=>r.item_id===id&&['希望','確�
 function render(){applyRoleUI();let q=($('search')?.value||'').toLowerCase(),f=$('filter')?.value||'all';
  $('invBody').innerHTML=inventory.map(x=>{let h=reserved(x.id),left=x.stock-h;if(!(x.item+x.variant).toLowerCase().includes(q))return'';if(f==='low'&&left>2)return'';if(f==='zero'&&left!==0)return'';if(f==='requested'&&h===0)return'';let cl=left<=0?'zero':left<=2?'low':'';return `<tr><td>${x.item}</td><td>${x.variant}</td><td class=num>${x.stock}</td><td class=num>${h}</td><td class="num ${cl}">${left}</td></tr>`}).join('');
  $('totalStock').textContent=inventory.reduce((a,x)=>a+x.stock,0);$('hopeCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).reduce((a,r)=>a+r.quantity,0);$('shortCount').textContent=inventory.filter(x=>x.stock-reserved(x.id)<0).length;$('pendingCount').textContent=requests.filter(r=>['希望','確定'].includes(r.status)).length;
- let low=inventory.map(x=>({...x,left:x.stock-reserved(x.id)})).filter(x=>x.left<=2);$('alerts').innerHTML=low.length?`<b>⚠️ 発注・在庫確認候補 ${low.length}件</b><br><span class=muted>${low.slice(0,8).map(x=>`${x.item} ${x.variant}：残見込み ${x.left}`).join(' ／ ')}${low.length>8?' ほか':''}</span>`:'<b>在庫不足アラートはありません。</b>';
+ let low=inventory.map(x=>{let hope=reserved(x.id);return {...x,hope,left:x.stock-hope}}).filter(x=>x.left<=2).sort((a,b)=>a.left-b.left||a.stock-b.stock||String(a.item).localeCompare(String(b.item),'ja'));
+ $('alerts').innerHTML=low.length?`<div class="stock-alert-panel"><div class="stock-alert-head"><b>⚠️ 発注・在庫確認候補 ${low.length}件</b><span class="muted">残見込みが少ない順</span></div><div class="stock-alert-list">${low.map(x=>`<div class="stock-alert-item ${x.stock===0?'zero-stock':x.left<=0?'danger':''}"><div class="stock-alert-name">${escapeHtml(x.item)} ${escapeHtml(x.variant)}</div><div class="stock-alert-metric">現在庫<strong>${x.stock}</strong></div><div class="stock-alert-metric">希望数<strong>${x.hope}</strong></div><div class="stock-alert-metric">残見込み<strong>${x.left}</strong></div></div>`).join('')}</div></div>`:'<div class="stock-alert-panel"><b>✓ 発注・在庫確認候補はありません。</b></div>';
  $('manageBody').innerHTML=requests.filter(r=>r.status!=='取消').map(r=>`<tr><td>${r.affiliations?.name||''}</td><td>${r.inventory_items?.item_name||''}</td><td>${r.inventory_items?.variant||''}</td><td>${r.quantity}</td><td><span class="badge ${r.status==='希望'?'hope':r.status==='確定'?'confirmed':'done'}">${r.status}</span></td><td>${r.status==='希望'?`<button class=btn onclick="setStatus(${r.id},'確定')">確定</button>`:r.status==='確定'?`<button class="btn primary" onclick="deliver(${r.id})">☑ 受渡済</button>`:`<button class="btn danger" onclick="undoDone(${r.id})">取消・在庫復元</button>`}</td></tr>`).join('');
  $('schoolSummary').innerHTML=affiliations.map(a=>{let rs=requests.filter(r=>r.affiliation_id===a.id&&r.status==='受渡済');return `<div class=schoolcard><b>${a.name}</b><br><span style="font-size:22px;color:#0877bd">${rs.reduce((n,r)=>n+r.quantity,0)}点</span><div class=muted>${rs.length}件の受渡し</div></div>`}).join('');
  renderHistory();renderProductSettings()}
