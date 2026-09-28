@@ -280,15 +280,46 @@ async function loadCoachAdmin(){
   const body=$('coachAdminBody'); if(!body||!isAdmin)return;
   try{
     const rows=await api('coach_profiles?select=*&order=created_at.asc');
-    body.innerHTML=rows.length?rows.map(p=>`<div class="coach-admin-row"><div><b>${escapeHtml(p.name||'')}</b><br><span class="muted">${escapeHtml(p.email||'')}</span></div><div>${escapeHtml(p.affiliation||'')}</div><div>${p.role==='admin'?'管理者':p.approved?'承認済み':'承認待ち'}</div><div>${p.role==='admin'?'':p.approved?`<button class="btn danger" onclick="setCoachApproval('${p.id}',false)">承認解除</button>`:`<button class="btn primary" onclick="setCoachApproval('${p.id}',true)">承認する</button>`}</div></div>`).join(''):'<p class="muted">登録者はいません。</p>';
+    body.innerHTML=rows.length?rows.map(p=>{
+      const isSelf=p.id===session?.user?.id;
+      const actions=p.role==='admin'
+        ? '<span class="muted">管理者</span>'
+        : `${p.approved
+            ? `<button class="btn danger" onclick="setCoachApproval('${p.id}',false)">承認解除</button>`
+            : `<button class="btn primary" onclick="setCoachApproval('${p.id}',true)">承認する</button>`}
+           <button class="btn danger" style="background:#b42318!important;color:#fff!important" onclick="deleteCoachAccount('${p.id}','${escapeHtml(p.name||p.email||'このコーチ')}')">完全削除</button>`;
+      return `<div class="coach-admin-row"><div><b>${escapeHtml(p.name||'')}</b><br><span class="muted">${escapeHtml(p.email||'')}</span></div><div>${escapeHtml(p.affiliation||'')}</div><div>${p.role==='admin'?'管理者':p.approved?'承認済み':'承認待ち'}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${isSelf?'<span class="muted">現在のアカウント</span>':actions}</div></div>`;
+    }).join(''):'<p class="muted">登録者はいません。</p>';
   }catch(e){console.error(e);body.innerHTML='<p class="login-error" style="display:block">コーチ一覧を読み込めませんでした。</p>'}
 }
+
 async function setCoachApproval(id,approved){
   if(!isAdmin)return;
   if(!confirm(approved?'このコーチを承認しますか？':'このコーチの承認を解除しますか？'))return;
   try{await api('coach_profiles?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({approved})});await loadCoachAdmin();alert(approved?'承認しました':'承認を解除しました')}
   catch(e){console.error(e);alert('承認状態の更新に失敗しました。Supabaseの管理者UPDATEポリシーを確認してください。')}
 }
+
+async function deleteCoachAccount(id,name){
+  if(!isAdmin)return alert('管理者のみ実行できます。');
+  if(id===session?.user?.id)return alert('現在ログイン中の管理者アカウントは削除できません。');
+  if(!confirm(`${name} を完全に削除しますか？\n\nログインアカウントとコーチ情報の両方を削除します。\nこの操作は元に戻せません。`))return;
+  if(!confirm(`最終確認です。\n${name} を本当に完全削除しますか？`))return;
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/delete_coach_account',{
+      method:'POST',
+      headers:authHeaders(),
+      body:JSON.stringify({target_user_id:id})
+    });
+    if(!r.ok)throw new Error(await r.text());
+    await loadCoachAdmin();
+    alert(`${name} を完全削除しました。`);
+  }catch(e){
+    console.error('コーチ完全削除エラー:',e);
+    alert('コーチの完全削除に失敗しました。\n\nエラー詳細：\n'+(e?.message||String(e)));
+  }
+}
+
 async function setStatus(id,status){try{await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status,confirmed_at:status==='確定'?new Date().toISOString():null})});await loadAll()}catch(e){alert('更新に失敗しました')}}
 async function deliver(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(it.stock<r.quantity&&!confirm('在庫数を超えています。受渡済にしますか？'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:Math.max(0,it.stock-r.quantity),updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'受渡済',delivered_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:-r.quantity,reason:`${r.affiliations?.name||''}へ受渡し`})});await loadAll()}catch(e){console.error(e);alert('受渡し処理に失敗しました')}}
 async function undoDone(id){let r=requests.find(x=>x.id===id),it=inventory.find(x=>x.id===r.item_id);if(!r||!it)return;if(!confirm('受渡済を取り消して在庫を戻しますか？\nこの希望は管理画面から非表示になります。'))return;try{await api(`inventory_items?id=eq.${it.id}`,{method:'PATCH',body:JSON.stringify({stock:it.stock+r.quantity,updated_at:new Date().toISOString()})});await api(`requests?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({status:'取消',delivered_at:null,cancelled_at:new Date().toISOString()})});await api('inventory_history',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({item_id:it.id,request_id:id,change_quantity:r.quantity,reason:`取消・在庫復元（${r.affiliations?.name||''}）`})});await loadAll();alert('受渡しを取り消し、在庫を復元しました')}catch(e){console.error(e);alert('取消処理に失敗しました')}}
