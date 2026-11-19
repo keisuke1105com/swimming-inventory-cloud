@@ -243,7 +243,14 @@ function render(){applyRoleUI();let q=($('search')?.value||'').toLowerCase(),f=$
  if(orderNeeded.length)alertHtml+=`<div class="stock-alert-panel" style="border-color:#e59a9a;background:#fff1f1"><div class="stock-alert-head"><b style="color:#a40000">🔴 要発注 ${orderNeeded.length}件</b><span class="muted">希望数が現在庫を超えている商品</span></div>${alertItems(orderNeeded,true)}</div>`;
  if(stockCheck.length)alertHtml+=`<div class="stock-alert-panel"><div class="stock-alert-head"><b>🟡 在庫切れ・在庫確認 ${stockCheck.length}件</b><span class="muted">赤＝残0 ／ オレンジ＝残1 ／ 黄＝残2</span></div>${alertItems(stockCheck)}</div>`;
  $('alerts').innerHTML=alertHtml||'<div class="stock-alert-panel"><b>✓ 要発注・在庫確認の商品はありません。</b></div>';
- $('manageBody').innerHTML=requests.filter(r=>r.status!=='取消').map(r=>`<tr><td>${r.affiliations?.name||''}</td><td>${r.inventory_items?.item_name||''}</td><td>${r.inventory_items?.variant||''}</td><td>${r.quantity}</td><td><span class="badge ${r.status==='希望'?'hope':r.status==='確定'?'confirmed':'done'}">${r.status}</span></td><td>${r.status==='希望'?`<button class=btn onclick="setStatus(${r.id},'確定')">確定</button>`:r.status==='確定'?`<button class="btn primary" onclick="deliver(${r.id})">☑ 受渡済</button>`:`<button class="btn danger" onclick="undoDone(${r.id})">取消・在庫復元</button>`}</td></tr>`).join('');
+ const requestsByAffiliation = new Map(affiliations.map(affiliation => [affiliation.id, []]));
+for (const request of requests) {
+  if (request.status === '取消') continue;
+  const affiliationId = request.affiliation_id;
+  if (!requestsByAffiliation.has(affiliationId)) requestsByAffiliation.set(affiliationId, []);
+  requestsByAffiliation.get(affiliationId).push(request);
+}
+$('manageBody').innerHTML=Array.from(requestsByAffiliation.values()).flat().map(r=>`<tr><td>${r.affiliations?.name||''}</td><td>${r.inventory_items?.item_name||''}</td><td>${r.inventory_items?.variant||''}</td><td>${r.quantity}</td><td><span class="badge ${r.status==='希望'?'hope':r.status==='確定'?'confirmed':'done'}">${r.status}</span></td><td>${r.status==='希望'?`<button class=btn onclick="setStatus(${r.id},'確定')">確定</button>`:r.status==='確定'?`<button class="btn primary" onclick="deliver(${r.id})">☑ 受渡済</button>`:`<button class="btn danger" onclick="undoDone(${r.id})">取消・在庫復元</button>`}</td></tr>`).join('');
  $('schoolSummary').innerHTML=affiliations.map(a=>{let rs=requests.filter(r=>r.affiliation_id===a.id&&r.status==='受渡済');return `<div class=schoolcard><b>${a.name}</b><br><span style="font-size:22px;color:#0877bd">${rs.reduce((n,r)=>n+r.quantity,0)}点</span><div class=muted>${rs.length}件の受渡し</div></div>`}).join('');
  renderHistory();renderProductSettings()}
 
